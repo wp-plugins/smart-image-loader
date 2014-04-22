@@ -15,7 +15,7 @@ Smart Image Loader is a fire-and-forget priority and lazy loader for image sourc
 
 Smart Image Loader will let images which are visible when loading the website load before any images whose position is outside the current viewport, so what you see first loads fast while the rest continues downloading after that in the background. Depending on the settings the hidden images can be loaded as soon as the visible images are loaded or "lazy loaded" just when the user scrolls the page to their position. This can be useful for bandwidth saving on mobile devices.
 
-**There is no need to insert any additional code into your website, just install the addon.**
+**There is no need to insert any additional code into your website, just install the plug-in.**
 
 The default settings are fine in most cases, but you may want to adjust them for optimization.
 
