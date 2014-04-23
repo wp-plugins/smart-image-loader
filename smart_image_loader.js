@@ -387,6 +387,7 @@ jQuery(function($){
 	{
 
 		scrolldistance = 0;
+		prev_y = false;
 
 		touching = true;
 
