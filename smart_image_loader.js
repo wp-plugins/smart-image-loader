@@ -211,43 +211,34 @@ jQuery(function($){
 
 		rubberbanding = scrolldistance;
 
-		var duration_ms =  Math.min( Math.abs(scrolldistance*3), 300 );
+		var
+		scroll_dir  = scrolldistance < 0 ? 1 : -1,
+		band_length = Math.min( Math.abs(scrolldistance), w.innerHeight/10 ) * scroll_dir,
+		duration_ms = Math.abs( scrolldistance*3 );
 
-		var backgroundElement = $("<div></div>").css(
-		{
-			backgroundColor: 'lightgray',
-			webkitTransition: 'height ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)',
-			mozTransition:    'height ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)',
-			oTransition:      'height ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)',
-			transition:       'height ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)'
-		});
+		duration_ms = Math.min( duration_ms, 200 );
+		duration_ms = Math.max( duration_ms, 75 );
 
-		if ( scrolldistance < 0 )
-			$("body").prepend( backgroundElement );
+		d.body.style.webkitTransition           = 'all ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)';
+		d.body.style.webkitTransform            = 'translate3d(0px, ' + band_length + 'px, 0px)';
+		d.documentElement.style.backgroundColor = 'lightgrey';
 
-		else if ( scrolldistance > 0 )
-			$("body").append( backgroundElement );
-
-		backgroundElement.css({
-			height: Math.abs(scrolldistance)+'px'
-		});
-
+		// halfway callback
 		w.setTimeout( function(){
 
-			backgroundElement.css({
-				height: '0px',
-				webkitTransition: 'height ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)',
-				mozTransition:    'height ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)',
-				oTransition:      'height ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)',
-				transition:       'height ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)'
-			});
+			d.body.style.webkitTransition = 'all ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)';
+			d.body.style.webkitTransform  = 'translate3d(0px, 0px, 0px)';
 		},
 		duration_ms * 0.5 );
 
+		// complete callback
 		w.setTimeout( function(){
 
+			d.body.style.webkitTransform  = '';
+			d.body.style.webkitTransition = '';
+			d.documentElement.style.backgroundColor = '';
+
 			rubberbanding = false;
-			backgroundElement.remove();
 		},
 		duration_ms * 2.5 );
 
@@ -306,24 +297,27 @@ jQuery(function($){
 			images_to_load  = $visible_images.length,
 			images_loaded   = 0;
 
-		$visible_images.each( function(i, el){
+		if ( images_to_load === 0 && typeof on_all_visible_load_callback == 'function' )
+			on_all_visible_load_callback();
 
-			load_image( el, function(){
+		else
+			$visible_images.each( function(i, el){
 
-				images_loaded = i+1;
+				load_image( el, function(e){
 
-				if ( images_loaded == images_to_load )
-				{
-					on_all_visible_loaded( on_all_visible_load_callback );
-				}
+					on_image_load(e);
 
-			}, fade );
+					images_loaded = i+1;
 
-			refresh_data( $wrapped_images );
-		});
+					if ( images_loaded == images_to_load && typeof on_all_visible_load_callback == 'function' )
+					{
+						on_all_visible_load_callback();
+					}
 
-		if ( images_to_load === 0 )
-			on_all_visible_loaded( on_all_visible_load_callback );
+				}, fade );
+
+				refresh_data( $wrapped_images );
+			});
 
 	},
 
@@ -332,10 +326,12 @@ jQuery(function($){
 	{
 
 		$wrapped_images.each( function(){
-			load_image( this );
+			load_image( this, on_image_load );
 		});
 
 	},
+
+
 
 
 
@@ -345,17 +341,16 @@ jQuery(function($){
 	//////////////////////////////////////////////////////////////////////////////////////
 
 
-	on_all_visible_loaded = function( on_all_visible_load_callback )
+	on_image_load = function( e )
 	{
+
 		// remove loaded images from object
-		$wrapped_images = $wrapped_images.filter( source_not_set );
+		$wrapped_images = $wrapped_images.map( function(){
+
+			if ( this !== e.target  ) return this;
+		});
 
 		all_loaded = $wrapped_images.length > 0 ? false : true;
-
-		if ( typeof on_all_visible_load_callback == 'function' )
-		{
-			on_all_visible_load_callback();
-		}
 
 		if ( all_loaded )
 		{
@@ -537,15 +532,6 @@ jQuery(function($){
 		if ( inertia )
 			emulate_scroll_inertia();
 
-
-		if ( rubberbanding )
-		{
-			if ( rubberbanding < 0 )
-				$html_body.scrollTop( 0 );
-
-			else if ( rubberbanding > 0 )
-				$html_body.scrollTop( doc_height + 1000 );
-		}
 
 		if ( !all_loaded || inertia || rubberbanding )
 			w.requestAnimationFrame( render );

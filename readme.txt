@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image
 Requires at least: 3.8.3
 Tested up to: 3.9
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,10 @@ Features responsive lazy loading on iOS devices (bypassing the scrolling script 
 
 
 == Changelog ==
+
+= 0.2.2 =
+* switched to css transform for the rubberbanding effect emulation
+* more accurate image load handling
 
 = 0.2.1 =
 * first release
