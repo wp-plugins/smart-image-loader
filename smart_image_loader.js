@@ -217,17 +217,23 @@ jQuery(function($){
 		duration_ms = Math.abs( scrolldistance*3 );
 
 		duration_ms = Math.min( duration_ms, 200 );
-		duration_ms = Math.max( duration_ms, 75 );
+		duration_ms = Math.max( duration_ms, 125 );
 
 		d.body.style.webkitTransition           = 'all ' + duration_ms / 1000 * 0.5 + 's cubic-bezier(0.3, 0.6, 0.6, 1)';
-		d.body.style.webkitTransform            = 'translate3d(0px, ' + band_length + 'px, 0px)';
 		d.documentElement.style.backgroundColor = 'lightgrey';
+
+		w.requestAnimationFrame( function(){
+			d.body.style.webkitTransform = 'translate3d(0px, ' + band_length + 'px, 0px)';
+		});
 
 		// halfway callback
 		w.setTimeout( function(){
 
 			d.body.style.webkitTransition = 'all ' + duration_ms / 1000 * 2 + 's cubic-bezier(0.5, 0.03, 0.5, 1)';
-			d.body.style.webkitTransform  = 'translate3d(0px, 0px, 0px)';
+
+			w.requestAnimationFrame( function(){
+				d.body.style.webkitTransform  = 'translate3d(0px, 0px, 0px)';
+			});
 		},
 		duration_ms * 0.5 );
 
