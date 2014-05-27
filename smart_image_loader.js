@@ -282,7 +282,7 @@ jQuery(function($){
 					});
 				}
 
-				$wrapping_image.attr( 'src', noscript.attr('alt') );
+				$wrapping_image.attr( 'src', noscript.attr('title') );
 
 				doc_height = $(d).height();
 

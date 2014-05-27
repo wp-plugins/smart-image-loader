@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image
 Requires at least: 3.8.3
 Tested up to: 3.9
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +23,8 @@ Smart Image Loader is tested and works down to Internet Explorer 7, disabled bel
 
 Features responsive lazy loading on iOS devices (bypassing the scrolling script blockage).
 
+Note: there is currently no support for horizontal visibility evaluation or (CSS) background images.
+
 
 == Installation ==
 
@@ -31,6 +33,9 @@ Features responsive lazy loading on iOS devices (bypassing the scrolling script 
 
 
 == Changelog ==
+
+= 0.2.3 =
+* using title instead of alt attribute for the sake of w3c conformity
 
 = 0.2.2 =
 * switched to css transform for the rubberbanding effect emulation
