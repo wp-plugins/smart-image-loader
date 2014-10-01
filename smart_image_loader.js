@@ -23,8 +23,11 @@ jQuery(function($){
 		// Threshold distance from actual visibility to insert the source (in pixels)
 		meat: 100,
 
-		// update the images position data on scroll and resize event. Useful if your site's layout changes dynamically. You can also refresh manually in your script with sil_refresh().
-		always_refresh: false,
+		// update the images position data on resize event. You can also refresh manually in your script with sil_refresh().
+		refresh_resize: true,
+
+		// update the images position data on resize event. You can also refresh manually in your script with sil_refresh().
+		refresh_scroll: false,
 
 		// Maximum screen width where to switch from priority to lazy loading. Set to 0 for no lazy loading
 		lazy_load_at: 1024,
@@ -38,19 +41,25 @@ jQuery(function($){
 
 	var d = document,
 		w = window,
+		$document = $(d),
 		$wrapping_image,
 		$wrapped_images,
 		$html_body,
 		noscripts,
 		host,
 
+		window_width,
 		window_height,
 		doc_height,
 		scroll_top,
+		scroll_left,
 
+		prev_x,
 		prev_y,
 		touching,
 		scrolldistance,
+		scrolldistanceX,
+		scrolldistanceY,
 		inertia,
 		rubberbanding,
 		all_loaded,
@@ -115,10 +124,16 @@ jQuery(function($){
 	{
 
 		var element,
+			$element,
 			element_offset_top,
+			element_offset_left,
+			element_width,
 			element_height,
-			is_not_above_top,
-			is_not_below_the_fold;
+			is_not_above_screen,
+			is_not_below_screen,
+			is_not_right_of_screen,
+			is_not_left_of_screen,
+			is_not_hidden;
 
 		if ( v.nodeType && v.nodeType == 1 )
 			element = v;
@@ -126,14 +141,21 @@ jQuery(function($){
 		else if ( this.nodeType && this.nodeType == 1 )
 			element = this;
 
+		$element = $(element);
 
-		element_offset_top    = $(element).data('offsetTop');
-		element_height        = $(element).data('height');
+		element_offset_top     = $element.data('offsetTop');
+		element_offset_left    = $element.data('offsetLeft');
+		element_width          = $element.data('width');
+		element_height         = $element.data('height');
+		element_visibile       = $element.data('visibility');
 
-		is_not_above_top      = element_offset_top + element_height > scroll_top - sil_options.meat;
-		is_not_below_the_fold = element_offset_top < scroll_top + window_height + sil_options.meat;
+		is_not_above_screen    = element_offset_top + element_height > scroll_top - sil_options.meat;
+		is_not_left_of_screen  = element_offset_left + element_width > scroll_left - sil_options.meat;
+		is_not_below_screen    = element_offset_top < scroll_top + window_height + sil_options.meat;
+		is_not_right_of_screen = element_offset_left < scroll_left + window_width + sil_options.meat;
 
-		return is_not_above_top && is_not_below_the_fold;
+
+		return is_not_above_screen && is_not_left_of_screen && is_not_below_screen && is_not_right_of_screen && element_visibile;
 
 	},
 
@@ -159,14 +181,19 @@ jQuery(function($){
 
 	refresh_data = function( $elements, update_view )
 	{
-
+console.log("refresh_data");
 		$elements = $elements || $wrapped_images || $('body').find('noscript').prev( sil_options.selector );
 
 		$elements.each( function(){
 
-			$(this).data({
-				offsetTop: $(this).offset().top,
-				height:    $(this).height()
+			var $this = $(this);
+
+			$this.data({
+				offsetTop:  $this.offset().top,
+				offsetLeft: $this.offset().left,
+				width:      $this.width(),
+				height:     $this.height(),
+				visibility: this.isVisible()
 			});
 		});
 
@@ -188,33 +215,33 @@ jQuery(function($){
 			scrolledTop,
 			scrolledEnd;
 
-		w.scrollBy( 0, Math.floor(scrolldistance/2) );
+		w.scrollBy( 0, Math.floor(scrolldistanceY/2) );
 
-		scrolldistance *= 0.95;
+		scrolldistanceY *= 0.95;
 		scrolledBottom = doc_height <= window_height + scroll_top + 1;
 		scrolledTop    = (scroll_top === 0);
 		scrolledEnd    = scrolledBottom || scrolledTop;
 
 		inertia = false;
 
-		if ( Math.abs(scrolldistance) > 2 && !touching && !scrolledEnd )
+		if ( Math.abs(scrolldistanceY) > 2 && !touching && !scrolledEnd )
 			inertia = true;
 
 		else if ( scrolledEnd && sil_options.emulate_rubberband )
-			emulate_rubberband( scrolldistance );
+			emulate_rubberband( scrolldistanceY );
 
 	},
 
 
-	emulate_rubberband = function( scrolldistance )
+	emulate_rubberband = function( scrolldistanceY )
 	{
 
-		rubberbanding = scrolldistance;
+		rubberbanding = scrolldistanceY;
 
 		var
-		scroll_dir  = scrolldistance < 0 ? 1 : -1,
-		band_length = Math.min( Math.abs(scrolldistance), w.innerHeight/10 ) * scroll_dir,
-		duration_ms = Math.abs( scrolldistance*3 );
+		scroll_dir  = scrolldistanceY < 0 ? 1 : -1,
+		band_length = Math.min( Math.abs(scrolldistanceY), w.innerHeight/10 ) * scroll_dir,
+		duration_ms = Math.abs( scrolldistanceY*3 );
 
 		duration_ms = Math.min( duration_ms, 200 );
 		duration_ms = Math.max( duration_ms, 125 );
@@ -284,7 +311,7 @@ jQuery(function($){
 
 				$wrapping_image.attr( 'src', noscript.attr('title') );
 
-				doc_height = $(d).height();
+				doc_height = $document.height();
 
 				if ( sil_options.cleanup )
 				{
@@ -304,12 +331,15 @@ jQuery(function($){
 			images_loaded   = 0;
 
 		if ( images_to_load === 0 && typeof on_all_visible_load_callback == 'function' )
+		{
 			on_all_visible_load_callback();
-
+		}
 		else
-			$visible_images.each( function(i, el){
+		{
+			$visible_images.each( function(i, image){
 
-				load_image( el, function(e){
+				// trigger image loading
+				load_image( image, function(e){
 
 					on_image_load(e);
 
@@ -322,8 +352,14 @@ jQuery(function($){
 
 				}, fade );
 
-				refresh_data( $wrapped_images );
+				// remove load triggered image from object
+				$wrapped_images = $wrapped_images.map( function(){
+
+					if ( this !== image ) return this;
+				});
 			});
+		}
+
 
 	},
 
@@ -332,7 +368,17 @@ jQuery(function($){
 	{
 
 		$wrapped_images.each( function(){
-			load_image( this, on_image_load );
+
+			var image = this;
+
+			// trigger image loading
+			load_image( image, on_image_load );
+
+			// remove load triggered image from object
+			$wrapped_images = $wrapped_images.map( function(){
+
+				if ( this !== image  ) return this;
+			});
 		});
 
 	},
@@ -350,17 +396,11 @@ jQuery(function($){
 	on_image_load = function( e )
 	{
 
-		// remove loaded images from object
-		$wrapped_images = $wrapped_images.map( function(){
-
-			if ( this !== e.target  ) return this;
-		});
-
 		all_loaded = $wrapped_images.length > 0 ? false : true;
 
 		if ( all_loaded )
 		{
-			$(d).trigger('sil_load');
+			$document.trigger('sil_load');
 		}
 
 	},
@@ -387,7 +427,10 @@ jQuery(function($){
 	on_touch_start = function()
 	{
 
-		scrolldistance = 0;
+		scrolldistanceX = 0;
+		scrolldistanceY = 0;
+
+		prev_x = false;
 		prev_y = false;
 
 		touching = true;
@@ -400,6 +443,7 @@ jQuery(function($){
 	on_touch_end = function()
 	{
 
+		prev_x = false;
 		prev_y = false;
 
 		touching = false;
@@ -438,7 +482,7 @@ jQuery(function($){
 	on_window_load = function()
 	{
 
-		doc_height = $(d).height();
+		doc_height = $document.height();
 
 		if ( iOS )
 			w.requestAnimationFrame( init );
@@ -451,16 +495,16 @@ jQuery(function($){
 
 		$(w).on('resize', on_window_resize);
 		$(w).on('load',   on_window_load);
-		$(d).on('scroll', on_document_scroll);
+		$document.on('scroll', on_document_scroll);
 
 		if ( sil_options.responsive_touch && iOS )
 		{
-			$(d).on('touchmove',  on_touch_move);
-			$(d).on('touchend',   on_touch_end);
-			$(d).on('touchstart', on_touch_start);
+			$document.on('touchmove',  on_touch_move);
+			$document.on('touchend',   on_touch_end);
+			$document.on('touchstart', on_touch_start);
 		}
 
-		$(d).ready( on_document_ready );
+		$document.ready( on_document_ready );
 	},
 
 
@@ -468,13 +512,13 @@ jQuery(function($){
 	{
 
 		$(w).off('resize', on_window_resize);
-		$(d).off('scroll', on_document_scroll);
+		$document.off('scroll', on_document_scroll);
 
 		if ( sil_options.responsive_touch && iOS )
 		{
-			$(d).off('touchmove',  on_touch_move);
-			$(d).off('touchend',   on_touch_end);
-			$(d).off('touchstart', on_touch_start);
+			$document.off('touchmove',  on_touch_move);
+			$document.off('touchend',   on_touch_end);
+			$document.off('touchstart', on_touch_start);
 		}
 
 	},
@@ -485,18 +529,19 @@ jQuery(function($){
 	//////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	render = function()
+	render = function( frame )
 	{
 
 		if ( scrolled() )
 		{
-			scroll_top = $(d).scrollTop();
+			scroll_top  = $document.scrollTop();
+			scroll_left = $document.scrollLeft();
+
+			if ( sil_options.refresh_scroll )
+				refresh_data( $wrapped_images );
 
 			if ( lazyload )
 				load_visible_images( null, true );
-
-			if ( sil_options.always_refresh )
-				refresh_data( $wrapped_images );
 
 			scroll_event_last = scroll_event;
 		}
@@ -504,35 +549,50 @@ jQuery(function($){
 
 		if ( moved() )
 		{
+			var currentX = move_event.originalEvent.layerX - scroll_left;
 			var currentY = move_event.originalEvent.layerY - scroll_top;
 
+			scrolldistanceX = scrolldistanceY = 0;
+
+			if ( prev_x && prev_x !== currentX )
+			{
+				scrolldistanceX = prev_x - currentX;
+			}
 			if ( prev_y && prev_y !== currentY )
 			{
-				scrolldistance = prev_y - currentY;
-
-				w.scrollBy( 0, scrolldistance );
+				scrolldistanceY = prev_y - currentY;
 			}
 
+			prev_x = currentX;
 			prev_y = currentY;
 
-			move_event_last   = move_event;
+			w.scrollBy( scrolldistanceX, scrolldistanceY );
+
+			move_event_last = move_event;
 		}
 
 
 		if ( resized() )
 		{
+			window_width = viewport().width;
 			window_height = viewport().height;
 
 			refresh_data( $wrapped_images );
 
+			if ( sil_options.refresh_resize )
+				refresh_data( $wrapped_images );
+
 			if ( lazyload )
 				load_visible_images( null, true );
 
-			if ( sil_options.always_refresh )
-				refresh_data( $wrapped_images );
-
 			resize_event_last = resize_event;
 		}
+
+
+		// if ( frame % 100 < 8 )
+		// {
+		// 	console.log(frame);
+		// }
 
 
 		if ( inertia )
@@ -554,10 +614,12 @@ jQuery(function($){
 		$html_body         = $('html, body');
 		noscripts          = $('body').find('noscript');
 		$wrapped_images    = noscripts.prev(sil_options.selector);
-		window_height       = viewport().height;
+		window_width       = viewport().width;
+		window_height      = viewport().height;
 		host               = d.location.protocol + '//' + d.location.host + '/';
-		scroll_top          = $(d).scrollTop();
-		doc_height          = $(d).height();
+		scroll_top         = $document.scrollTop();
+		scroll_left        = $document.scrollLeft();
+		doc_height         = $document.height();
 		inertia            = false;
 		rubberbanding      = false;
 		all_loaded         = $wrapped_images.length > 0 ? false : true;

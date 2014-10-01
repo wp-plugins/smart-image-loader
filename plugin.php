@@ -3,7 +3,7 @@
 Plugin Name: Smart Image Loader
 Plugin URI: https://wordpress.org/plugins/smart-image-loader
 Description: Load images visible at page load before loading images 'below the fold' for a fast page loading impression. Optional lazy loading for images 'below the fold' (no loading until visible).
-Version: 0.2.3
+Version: 0.3.0
 Text Domain: smart-image-loader
 Author: Bayer und Preuss
 Author URI: www.bayerundpreuss.com
@@ -23,8 +23,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-Credits to  S.C. Chen, John Schlick, Rus Carroll for
+Credits to S.C. Chen, John Schlick, Rus Carroll for
 http://sourceforge.net/projects/simplehtmldom/
+and Jason Farrell for
+https://gist.github.com/jasonfarrell/3659166#file-visibility-js
 */
 
 require_once('simple_html_dom.php');
@@ -83,26 +85,30 @@ function _get_html_string_from_parentfile( $line )
 	return $html_string;
 }
 
-if ( !function_exists('wp_enqueue_script') ) return;
+if ( !function_exists('wp_register_script') ) return;
 // wordpress stuff starts here
+
 
 function _inject_imagewrapper_js()
 {
-	wp_enqueue_script('smart-image-loader', '/wp-content/plugins/smart-image-loader/smart_image_loader.min.js', array('jquery') );
+	wp_register_script('visibility', '/wp-content/plugins/smart-image-loader/visibility.js');
+	wp_enqueue_script('smart-image-loader', '/wp-content/plugins/smart-image-loader/smart_image_loader.min.js', array('jquery', 'visibility'));
 ?>
 	<script>
 		var sil_options = {
-			selector:           <?= '"' . get_option('sil-selector', 'img') . '"' ?>,
-			exclude:            <?= '"' . get_option('sil-exclude', 'not-smart') . '"' ?>,
-			cleanup:            <?= get_option('sil-cleanup', 'true') ? 'true' : 'false' ?>,
-			responsive_touch:   <?= get_option('sil-responsive-touch', 'false') ? 'true' : 'false' ?>,
-			emulate_inertia:    <?= get_option('sil-emulate-inertia', 'false') ? 'true' : 'false' ?>,
-			emulate_rubberband: <?= get_option('sil-emulate-rubberband', 'false') ? 'true' : 'false' ?>,
-			meat:               <?= get_option('sil-meat', '100') ?>,
-			always_refresh:     <?= get_option('sil-refresh', 'false') ? 'true' : 'false' ?>,
-			lazy_load_at:       <?= get_option('sil-lazy-load-at', '0') ?>,
-			fade:               <?= get_option('sil-fade', 'false') ? 'true' : 'false' ?>,
-			placeholder:        <?= '"' . get_option('sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') . '"' ?>
+			selector:              <?= '"' . get_option('sil-selector', 'img') . '"' ?>,
+			exclude:               <?= '"' . get_option('sil-exclude', 'not-smart') . '"' ?>,
+			cleanup:               <?= get_option('sil-cleanup', 'true') ? 'true' : 'false' ?>,
+			responsive_touch:      <?= get_option('sil-responsive-touch', 'false') ? 'true' : 'false' ?>,
+			emulate_inertia:       <?= get_option('sil-emulate-inertia', 'false') ? 'true' : 'false' ?>,
+			emulate_rubberband:    <?= get_option('sil-emulate-rubberband', 'false') ? 'true' : 'false' ?>,
+			meat:                  <?= get_option('sil-meat', '100') ?>,
+			refresh_resize:        <?= get_option('sil-refresh-resize', 'false') ? 'true' : 'false' ?>,
+			refresh_scroll:        <?= get_option('sil-refresh-scroll', 'false') ? 'true' : 'false' ?>,
+			enhanced_accuracy:     <?= get_option('sil-accuracy', 'false') ? 'true' : 'false' ?>,
+			lazy_load_at:          <?= get_option('sil-lazy-load-at', '0') ?>,
+			fade:                  <?= get_option('sil-fade', 'false') ? 'true' : 'false' ?>,
+			placeholder:           <?= '"' . get_option('sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') . '"' ?>
 		};
 	</script>
 <?php
@@ -132,7 +138,9 @@ function add_sil_options() {
 	add_option( 'sil-emulate-inertia', 'false');
 	add_option( 'sil-emulate-rubberband', 'false');
 	add_option( 'sil-meat', '100');
-	add_option( 'sil-refresh', 'false');
+	add_option( 'sil-refresh-resize', 'true');
+	add_option( 'sil-refresh-scroll', 'false');
+	add_option( 'sil-accuracy', 'false');
 	add_option( 'sil-lazy-load-at', '0');
 	add_option( 'sil-fade', 'false');
 	add_option( 'sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
@@ -147,7 +155,9 @@ function register_sil_settings() {
 	register_setting( 'sil-settings-group', 'sil-emulate-inertia' );
 	register_setting( 'sil-settings-group', 'sil-emulate-rubberband' );
 	register_setting( 'sil-settings-group', 'sil-meat' );
-	register_setting( 'sil-settings-group', 'sil-refresh' );
+	register_setting( 'sil-settings-group', 'sil-refresh-resize' );
+	register_setting( 'sil-settings-group', 'sil-refresh-scroll' );
+	register_setting( 'sil-settings-group', 'sil-accuracy' );
 	register_setting( 'sil-settings-group', 'sil-lazy-load-at' );
 	register_setting( 'sil-settings-group', 'sil-fade' );
 	register_setting( 'sil-settings-group', 'sil-placeholder' );

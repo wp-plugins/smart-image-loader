@@ -3,8 +3,8 @@ Contributors:
 Donate link:
 Tags: performance, speed, lazy loading, image
 Requires at least: 3.8.3
-Tested up to: 3.9
-Stable tag: 0.2.3
+Tested up to: 4.0
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ Smart Image Loader is a fire-and-forget priority and lazy loader for image sourc
 
 == Description ==
 
-Smart Image Loader will let images which are visible when loading the website load before any images whose position is outside the current viewport, so what you see first loads fast while the rest continues downloading after that in the background. Depending on the settings the hidden images can be loaded as soon as the visible images are loaded or "lazy loaded" just when the user scrolls the page to their position. This can be useful for bandwidth saving on mobile devices.
+Smart Image Loader will let images which are visible when loading the website load before any images whose position is outside the current viewport, so what you see first loads fast while the rest continues downloading after that in the background. Depending on the settings the hidden images can be loaded as soon as the visible images are loaded or "lazy loaded" just when (or before) they would be visible. This can be useful for bandwidth saving on mobile devices.
 
 **There is no need to insert any additional code into your website, just install the plug-in.**
 
@@ -23,7 +23,7 @@ Smart Image Loader is tested and works down to Internet Explorer 7, disabled bel
 
 Features responsive lazy loading on iOS devices (bypassing the scrolling script blockage).
 
-Note: there is currently no support for horizontal visibility evaluation or (CSS) background images.
+Note: there is currently no support for (CSS) background images.
 
 
 == Installation ==
@@ -33,6 +33,12 @@ Note: there is currently no support for horizontal visibility evaluation or (CSS
 
 
 == Changelog ==
+
+= 0.3.0 =
+* enhanced accuracy option (checking actual visibility in addition to viewport relative position)
+* splitted refresh option into resize and scroll event
+* performance tweaks
+* tested with WordPress 4.0
 
 = 0.2.3 =
 * using title instead of alt attribute for the sake of w3c conformity
