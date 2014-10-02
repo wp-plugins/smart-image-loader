@@ -181,7 +181,7 @@ jQuery(function($){
 
 	refresh_data = function( $elements, update_view )
 	{
-console.log("refresh_data");
+
 		$elements = $elements || $wrapped_images || $('body').find('noscript').prev( sil_options.selector );
 
 		$elements.each( function(){
@@ -587,12 +587,6 @@ console.log("refresh_data");
 
 			resize_event_last = resize_event;
 		}
-
-
-		// if ( frame % 100 < 8 )
-		// {
-		// 	console.log(frame);
-		// }
 
 
 		if ( inertia )

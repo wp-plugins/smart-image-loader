@@ -13,7 +13,7 @@ Smart Image Loader is a fire-and-forget priority and lazy loader for image sourc
 
 == Description ==
 
-Smart Image Loader will let images which are visible in the initial viewport of your website load before any images whose position is "below the fold", outside the current viewport. Depending on the settings the invisible images can be loaded as soon as the visible images are finished loading or "lazy loaded" just when (or before) they would become visible. This can be useful for bandwidth saving on mobile devices.
+Smart Image Loader loads images which are visible in the initial viewport of your website before any images whose position is "below the fold", outside the current viewport. Those images can be loaded as soon as the visible images are finished loading or "lazy loaded" just when (or before) they would become visible. This can be useful for bandwidth saving on mobile devices.
 
 **There is no need to insert any additional code into your website, just install the plug-in.**
 
@@ -21,7 +21,7 @@ The default settings are fine in most cases, but you may want to adjust them for
 
 Smart Image Loader is tested and works down to Internet Explorer 7, disabled below.
 
-Features responsive lazy loading on iOS devices (bypassing the scrolling script blockage).
+Features responsive lazy loading on iOS devices (bypassing the scrolling script blockage) and checking for actual visibility.
 
 Note: there is currently no support for (CSS) background images.
 
