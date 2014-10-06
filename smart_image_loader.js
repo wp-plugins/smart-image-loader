@@ -211,6 +211,7 @@ jQuery(function($){
 				height:     $this.height(),
 				visibility: getStyle(this, 'display') != "none" && getStyle(this, 'visibility') != "hidden" && getStyle(this, 'opacity') != "0"
 			});
+
 		});
 
 
@@ -303,11 +304,11 @@ jQuery(function($){
 	load_image = function( wrapping_image, on_load_callback, fade )
 	{
 
-		var
-		classId   = wrapping_image.className.match(/sil-\d+/g),
-		$noscript = $noscripts.filter( '.' + classId );
-
 		$wrapping_image = $(wrapping_image);
+
+		var
+		classId   = $wrapping_image.attr('data-sil'),
+		$noscript = $noscripts.filter( '[data-sil="' + classId + '"]');
 
 
 		if ( typeof on_load_callback == 'function' )
@@ -619,8 +620,8 @@ jQuery(function($){
 	{
 
 		$html_body         = $('html, body');
-		$noscripts         = $('body').find('noscript.sil-imageholder');
-		$wrapped_images    = $(sil_options.selector + '.sil-placeholder');
+		$noscripts         = $('body').find('noscript[data-sil]');
+		$wrapped_images    = $(sil_options.selector + '[data-sil]');
 		window_width       = viewport().width;
 		window_height      = viewport().height;
 		host               = d.location.protocol + '//' + d.location.host + '/';
