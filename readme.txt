@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image, above the fold
 Requires at least: 3.8.3
 Tested up to: 4.0
-Stable tag: 0.3.4
+Stable tag: 0.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Note: there is currently no support for (CSS) background images.
 
 
 == Changelog ==
+
+= 0.3.5 =
+* adressed php warning caused by mt_rand
 
 = 0.3.4 =
 * force data refresh for every source being inserted to adress img tags without proper sizes set causing a reflow
