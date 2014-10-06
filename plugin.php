@@ -25,8 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 Credits to S.C. Chen, John Schlick, Rus Carroll for
 http://sourceforge.net/projects/simplehtmldom/
-and Jason Farrell for
-https://gist.github.com/jasonfarrell/3659166#file-visibility-js
 */
 
 require_once('simple_html_dom.php');

@@ -37,6 +37,7 @@ Note: there is currently no support for (CSS) background images.
 = 0.3.2 =
 * fixed a bug where images inserted via [caption] shortcode were being ignored
 * fixed bug where enhanced accuracy would always be on
+* removed overflow/offset checking for now because it was buggy anyway
 
 = 0.3.1 =
 * added fancy tag word
