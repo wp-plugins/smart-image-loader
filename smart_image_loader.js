@@ -29,6 +29,9 @@ jQuery(function($){
 		// update the images position data on resize event. You can also refresh manually in your script with sil_refresh().
 		refresh_scroll: false,
 
+		// Check the images' actual visibility in addition to their position relative to the viewport.
+		enhanced_accuracy: false,
+
 		// Maximum screen width where to switch from priority to lazy loading. Set to 0 for no lazy loading
 		lazy_load_at: 1024,
 
@@ -45,7 +48,7 @@ jQuery(function($){
 		$wrapping_image,
 		$wrapped_images,
 		$html_body,
-		noscripts,
+		$noscripts,
 		host,
 
 		window_width,
@@ -193,7 +196,7 @@ jQuery(function($){
 				offsetLeft: $this.offset().left,
 				width:      $this.width(),
 				height:     $this.height(),
-				visibility: this.isVisible()
+				visibility: sil_options.enhanced_accuracy ? this.isVisible() : true
 			});
 		});
 
@@ -286,39 +289,36 @@ jQuery(function($){
 
 	load_image = function( wrapping_image, on_load_callback, fade )
 	{
+
+		var
+		classId   = wrapping_image.className.match(/sil-\d+/g),
+		$noscript = $noscripts.filter( '.' + classId );
+
 		$wrapping_image = $(wrapping_image);
 
-		noscripts.each( function( i, el )
+
+		if ( typeof on_load_callback == 'function' )
+			$wrapping_image.on( 'load', on_load_callback );
+
+
+		if ( sil_options.fade && fade )
 		{
-			var noscript = $( el );
+			$wrapping_image.data({ opacity: $wrapping_image.css('opacity') }).css({ opacity: '0' });
 
-			if ( noscript.prev().get(0) == wrapping_image )
-			{
+			$wrapping_image.on( 'load', function(){
 
-				if ( typeof on_load_callback == 'function' )
-					$wrapping_image.on( 'load', on_load_callback );
+				$(this).fadeTo( 500, $(this).data('opacity') );
+			});
+		}
 
+		$wrapping_image.attr( 'src', $noscript.attr('title') );
 
-				if ( sil_options.fade && fade )
-				{
-					$wrapping_image.data({ opacity: $wrapping_image.css('opacity') }).css({ opacity: '0' });
+		doc_height = $(d).height();
 
-					$wrapping_image.on( 'load', function(){
-
-						$(this).fadeTo( 500, $(this).data('opacity') );
-					});
-				}
-
-				$wrapping_image.attr( 'src', noscript.attr('title') );
-
-				doc_height = $document.height();
-
-				if ( sil_options.cleanup )
-				{
-					noscript.remove();
-				}
-			}
-		});
+		if ( sil_options.cleanup )
+		{
+			$noscript.remove();
+		}
 
 	},
 
@@ -606,8 +606,8 @@ jQuery(function($){
 	{
 
 		$html_body         = $('html, body');
-		noscripts          = $('body').find('noscript');
-		$wrapped_images    = noscripts.prev(sil_options.selector);
+		$noscripts         = $('body').find('noscript.sil-imageholder');
+		$wrapped_images    = $(sil_options.selector + '.sil-placeholder');
 		window_width       = viewport().width;
 		window_height      = viewport().height;
 		host               = d.location.protocol + '//' + d.location.host + '/';

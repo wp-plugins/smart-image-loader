@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image, above the fold
 Requires at least: 3.8.3
 Tested up to: 4.0
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,10 @@ Note: there is currently no support for (CSS) background images.
 
 
 == Changelog ==
+
+= 0.3.2 =
+* fixed a bug where images inserted via [caption] shortcode were being ignored
+* fixed bug where enhanced accuracy would always be on
 
 = 0.3.1 =
 * added fancy tag word

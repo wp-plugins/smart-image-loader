@@ -3,7 +3,7 @@
 Plugin Name: Smart Image Loader
 Plugin URI: https://wordpress.org/plugins/smart-image-loader
 Description: Load images visible at page load ('above the fold') first for a fast page loading impression. Optional lazy loading for images 'below the fold'.
-Version: 0.3.1
+Version: 0.3.2
 Text Domain: smart-image-loader
 Author: Bayer und Preuss
 Author URI: www.bayerundpreuss.com
@@ -59,17 +59,21 @@ function get_wrapped_html( $html_string )
 		$exclude_classes = explode(',', $exclude_classes);
 	}
 
+	$i = 1;
 	foreach( $html->find($selector) as $element )
 	{
 		$classes = explode(' ', $element->class);
 
 		if ( count( array_intersect($classes, $exclude_classes) ) > 0 ) continue;
 
+		$class_id = 'sil-' . $i++;
+
 		$element_empty_html   = str_get_html( $element->outertext );
 		$element_empty        = $element_empty_html->find( $selector, 0 );
 		$element_empty->src   = $placeholder;
+		$element_empty->class = $element_empty->class . ' sil-placeholder ' . $class_id;
 
-		$element->outertext = $element_empty->outertext . PHP_EOL . '<noscript title="' . $element->src . '">' . $element->outertext . '</noscript>' . PHP_EOL;
+		$element->outertext = $element_empty->outertext . PHP_EOL . '<noscript class="sil-imageholder ' . $class_id . '" title="' . $element->src . '">' . $element->outertext . '</noscript>' . PHP_EOL;
 	}
 
 	return $html;
