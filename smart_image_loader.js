@@ -214,6 +214,7 @@ jQuery(function($){
 
 		});
 
+		doc_height = $(d).height();
 
 		if ( update_view )
 		{
@@ -327,7 +328,9 @@ jQuery(function($){
 
 		$wrapping_image.attr( 'src', $noscript.attr('title') );
 
-		doc_height = $(d).height();
+		requestAnimationFrame(function () {
+			refresh_data( $wrapped_images, true );
+		});
 
 		if ( sil_options.cleanup )
 		{
