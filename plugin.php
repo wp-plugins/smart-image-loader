@@ -93,8 +93,7 @@ if ( !function_exists('wp_register_script') ) return;
 
 function _inject_imagewrapper_js()
 {
-	wp_register_script('visibility', '/wp-content/plugins/smart-image-loader/visibility.js');
-	wp_enqueue_script('smart-image-loader', '/wp-content/plugins/smart-image-loader/smart_image_loader.min.js', array('jquery', 'visibility'));
+	wp_enqueue_script('smart-image-loader', '/wp-content/plugins/smart-image-loader/smart_image_loader.min.js', array('jquery'));
 ?>
 	<script>
 		var sil_options = {
