@@ -3,7 +3,7 @@
 Plugin Name: Smart Image Loader
 Plugin URI: https://wordpress.org/plugins/smart-image-loader
 Description: Load images visible at page load ('above the fold') first for a fast page loading impression. Optional lazy loading for images 'below the fold'.
-Version: 0.3.5
+Version: 0.3.6
 Text Domain: smart-image-loader
 Author: Bayer und Preuss
 Author URI: www.bayerundpreuss.com
@@ -43,10 +43,11 @@ function get_wrapped_html( $html_string )
 	if ( preg_match('/(?i)msie [1-6]/', $_SERVER['HTTP_USER_AGENT']) || strlen($html_string) === 0 )
 		return $html_string;
 
-	$html          = str_get_html( $html_string );
-	$selector      = 'img';
-	$exclude_class = 'not-smart';
-	$placeholder   = '';
+	$html            = str_get_html( $html_string );
+	$selector        = 'img';
+	$exclude_class   = 'not-smart';
+	$placeholder     = '';
+	$exclude_classes = array();
 
 	if ( function_exists('get_option') )
 	{
@@ -117,13 +118,27 @@ function _inject_imagewrapper_js()
 }add_action( 'wp_enqueue_scripts', '_inject_imagewrapper_js' );
 
 
+function sil_css() {
+	wp_enqueue_style(
+		'no-js-hide',
+		 get_stylesheet_directory_uri()  . '/style.css'
+	);
+		$custom_css = "
+				.no-js img[data-sil] {
+					display: none;
+				}";
+		wp_add_inline_style( 'no-js-hide', $custom_css );
+}
+add_action( 'wp_enqueue_scripts', 'sil_css' );
+
+
 function sil_settings_links($links)
 {
 	$url = get_admin_url().'plugins.php?page=smart-image-loader/options.php';
 
-    $settings_link = '<a href="' . $url . '">' . __( 'Settings' ) . '</a>';
-    array_unshift($links, $settings_link);
-    return $links;
+	$settings_link = '<a href="' . $url . '">' . __( 'Settings' ) . '</a>';
+	array_unshift($links, $settings_link);
+	return $links;
 }add_filter("plugin_action_links_smart-image-loader/plugin.php", 'sil_settings_links');
 
 
