@@ -36,6 +36,7 @@ Note: there is currently no support for (CSS) background images.
 
 = 0.3.9 =
 * fixed bug where some images would not load on older android versions (2.x)
+* fixed issue where images would load too late when no absolute width and height was given and refresh on scroll was off
 
 = 0.3.8 =
 * fixed images not being loaded when js would ignore no-js class

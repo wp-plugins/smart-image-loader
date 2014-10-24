@@ -195,6 +195,12 @@ jQuery(function($){
 	},
 
 
+	has_absolute_size = function( img )
+	{
+		return typeof img.width == "string" && img.width.match(/^\d+$/) && typeof img.height == "string" && img.height.match(/^\d+$/);
+	},
+
+
 	refresh_data = function( $elements, update_view )
 	{
 
@@ -329,7 +335,12 @@ jQuery(function($){
 		$wrapping_image.attr( 'src', $noscript.attr('title') );
 
 		requestAnimationFrame(function () {
-			refresh_data( $wrapped_images, true );
+
+			// sometimes the one frame is not enough so we will refresh_data again on load
+			if ( !has_absolute_size(wrapping_image) )
+			{
+				refresh_data( $wrapped_images, true );
+			}
 		});
 
 		if ( sil_options.cleanup )
@@ -361,6 +372,12 @@ jQuery(function($){
 					on_image_load(e);
 
 					images_loaded = i+1;
+
+					// has the document layout changed after the source has been inserted?
+					if ( !has_absolute_size(e.target) )
+					{
+						refresh_data( $wrapped_images, true );
+					}
 
 					if ( images_loaded == images_to_load && typeof on_all_visible_load_callback == 'function' )
 					{
