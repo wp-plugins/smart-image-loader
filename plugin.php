@@ -27,7 +27,7 @@ Credits to S.C. Chen, John Schlick, Rus Carroll for
 http://sourceforge.net/projects/simplehtmldom/
 */
 
-if ( !class_exists('simple_html_dom') )
+if ( !class_exists('simple_html_dom') && !function_exists('file_get_html') )
 {
 	require_once("simple_html_dom.php");
 }
