@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image, above the fold
 Requires at least: 3.8.3
 Tested up to: 4.0
-Stable tag: 0.3.8
+Stable tag: 0.3.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Note: there is currently no support for (CSS) background images.
 
 
 == Changelog ==
+
+= 0.3.9 =
+* fixed bug where some images would not load on older android versions (2.x)
 
 = 0.3.8 =
 * fixed images not being loaded when js would ignore no-js class

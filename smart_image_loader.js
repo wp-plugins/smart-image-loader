@@ -334,7 +334,7 @@ jQuery(function($){
 
 		if ( sil_options.cleanup )
 		{
-			$noscript.remove();
+			$noscript.parent('span').remove();
 		}
 
 	},
