@@ -61,14 +61,15 @@ function get_wrapped_html( $html_string )
 		$exclude_classes = explode(',', $exclude_classes);
 	}
 
+	$i = 0;
 	foreach( $html->find($selector) as $element )
 	{
 
 		$classes = explode(' ', $element->class);
 
-		if ( count( array_intersect($classes, $exclude_classes) ) > 0 ) continue;
+		if ( count( array_intersect($classes, $exclude_classes) ) > 0 || preg_match( '/\.php/', $element->src) ) continue;
 
-		$class_id = 'sil-' . mt_rand();
+		$class_id = 'sil-' . $i++;
 
 		$element_empty_html = str_get_html( $element->outertext );
 		$element_empty      = $element_empty_html->find( $selector, 0 );

@@ -66,6 +66,7 @@ jQuery(function($){
 		inertia,
 		rubberbanding,
 		all_loaded,
+		initialized,
 
 		scroll_event,
 		scroll_event_last,
@@ -440,10 +441,11 @@ jQuery(function($){
 	},
 
 
-	on_user_refresh = function()
+	on_user_refresh = window.sil_refresh = function()
 	{
 
-		refresh_data( $wrapped_images, true );
+		if ( initialized === true )
+			refresh_data( $wrapped_images, true );
 
 	},
 
@@ -651,7 +653,7 @@ jQuery(function($){
 		inertia            = false;
 		rubberbanding      = false;
 		all_loaded         = $wrapped_images.length > 0 ? false : true;
-		window.sil_refresh = on_user_refresh;
+
 
 		refresh_data( $wrapped_images );
 
@@ -661,6 +663,8 @@ jQuery(function($){
 			load_visible_images( load_all_images );
 
 		render();
+
+		initialized = true;
 
 	};
 
