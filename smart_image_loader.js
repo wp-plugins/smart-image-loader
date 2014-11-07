@@ -380,9 +380,14 @@ jQuery(function($){
 						refresh_data( $wrapped_images, true );
 					}
 
-					if ( images_loaded == images_to_load && typeof on_all_visible_load_callback == 'function' )
+					if ( images_loaded == images_to_load )
 					{
-						on_all_visible_load_callback();
+						$document.trigger('sil_load_visible');
+
+						if ( typeof on_all_visible_load_callback == 'function' )
+						{
+							on_all_visible_load_callback();
+						}
 					}
 
 				}, fade );
@@ -431,11 +436,13 @@ jQuery(function($){
 	on_image_load = function( e )
 	{
 
+		$document.trigger('sil_load');
+
 		all_loaded = $wrapped_images.length > 0 ? false : true;
 
 		if ( all_loaded )
 		{
-			$document.trigger('sil_load');
+			$document.trigger('sil_load_all');
 		}
 
 	},
