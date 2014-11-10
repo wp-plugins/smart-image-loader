@@ -146,6 +146,7 @@ jQuery(function($){
 			element_offset_left,
 			element_width,
 			element_height,
+			element_visibile,
 			is_not_above_screen,
 			is_not_below_screen,
 			is_not_right_of_screen,
