@@ -4,7 +4,7 @@ Donate link:
 Tags: performance, speed, lazy loading, image, above the fold
 Requires at least: 3.8.3
 Tested up to: 4.0
-Stable tag: 0.3.9
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,12 @@ Note: there is currently no support for (CSS) background images.
 
 
 == Changelog ==
+
+= 0.4.0 =
+* fixed some rather serious issues
+* fixed js strict error in unminified file
+* exposing sil_refresh() _before_ document ready
+* added more events! document.sil_load, document.sil_load_visible, document.sil_load_all
 
 = 0.3.9 =
 * fixed bug where some images would not load on older android versions (2.x)

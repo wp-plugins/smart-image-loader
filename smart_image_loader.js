@@ -1,4 +1,6 @@
-jQuery(function($){
+(function($) {
+
+	// Version: 0.4.0
 
 	"use strict";
 
@@ -47,6 +49,7 @@ jQuery(function($){
 		$document = $(d),
 		$wrapping_image,
 		$wrapped_images,
+		$loading_images,
 		$html_body,
 		$noscripts,
 		host,
@@ -203,7 +206,7 @@ jQuery(function($){
 	},
 
 
-	refresh_data = function( $elements, update_view )
+	refresh_data = function( $elements )
 	{
 
 		$elements = $elements || $wrapped_images || $('body').find('noscript').prev( sil_options.selector );
@@ -224,12 +227,6 @@ jQuery(function($){
 
 		doc_height = $(d).height();
 
-		if ( update_view )
-		{
-			var callback = lazyload ? null : load_all_images;
-
-			load_visible_images( callback, true );
-		}
 
 	},
 
@@ -310,7 +307,7 @@ jQuery(function($){
 	//////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	load_image = function( wrapping_image, on_load_callback, fade )
+	load_image = function( wrapping_image, on_load_callback, override_fading )
 	{
 
 		$wrapping_image = $(wrapping_image);
@@ -324,7 +321,8 @@ jQuery(function($){
 			$wrapping_image.on( 'load', on_load_callback );
 
 
-		if ( sil_options.fade && fade )
+
+		if ( sil_options.fade && !override_fading )
 		{
 			$wrapping_image.data({ opacity: $wrapping_image.css('opacity') }).css({ opacity: '0' });
 
@@ -336,12 +334,16 @@ jQuery(function($){
 
 		$wrapping_image.attr( 'src', $noscript.attr('title') );
 
+		$loading_images = $loading_images.add( $wrapping_image );
+
+
+		// waiting one frame for the image to affect layout and refresh data. sometimes it's not enough, so we'll do it again on load.
 		requestAnimationFrame(function () {
 
-			// sometimes the one frame is not enough so we will refresh_data again on load
 			if ( !has_absolute_size(wrapping_image) )
 			{
-				refresh_data( $wrapped_images, true );
+				refresh_data( $wrapped_images );
+				load_visible_images();
 			}
 		});
 
@@ -353,54 +355,26 @@ jQuery(function($){
 	},
 
 
-	load_visible_images = function( on_all_visible_load_callback, fade )
+	load_visible_images = function( override_fading )
 	{
 
-		var $visible_images = $wrapped_images.filter( is_visible ),
-			images_to_load  = $visible_images.length,
-			images_loaded   = 0;
+		var $images_to_load = $wrapped_images.filter( is_visible );
 
-		if ( images_to_load === 0 && typeof on_all_visible_load_callback == 'function' )
+		if ( $images_to_load.length > 0 )
 		{
-			on_all_visible_load_callback();
-		}
-		else
-		{
-			$visible_images.each( function(i, image){
-
-				// trigger image loading
-				load_image( image, function(e){
-
-					on_image_load(e);
-
-					images_loaded = i+1;
-
-					// has the document layout changed after the source has been inserted?
-					if ( !has_absolute_size(e.target) )
-					{
-						refresh_data( $wrapped_images, true );
-					}
-
-					if ( images_loaded == images_to_load )
-					{
-						$document.trigger('sil_load_visible');
-
-						if ( typeof on_all_visible_load_callback == 'function' )
-						{
-							on_all_visible_load_callback();
-						}
-					}
-
-				}, fade );
+			$images_to_load.each( function(i, image){
 
 				// remove load triggered image from object
 				$wrapped_images = $wrapped_images.map( function(){
 
 					if ( this !== image ) return this;
 				});
+
+				// trigger image loading
+				load_image( image, on_image_load, override_fading );
+
 			});
 		}
-
 
 	},
 
@@ -437,14 +411,55 @@ jQuery(function($){
 	on_image_load = function( e )
 	{
 
-		$document.trigger('sil_load');
+		var $images_to_load, $images_waiting;
 
-		all_loaded = $wrapped_images.length > 0 ? false : true;
+		$document.trigger('sil_load', e.target);
 
-		if ( all_loaded )
+		// has the document layout changed after the source has been inserted?
+		if ( !has_absolute_size(e.target) )
 		{
-			$document.trigger('sil_load_all');
+			// then do new check
+			refresh_data( $wrapped_images );
+			load_visible_images();
 		}
+
+
+		$images_to_load = $wrapped_images.filter( is_visible );
+		$images_waiting = $wrapped_images.not($images_to_load);
+		$loading_images = $loading_images.map( function(){
+
+			if ( this !== e.target ) return this;
+		});
+
+		if ( $images_to_load.length + $loading_images.length === 0 )
+		{
+			if ( $images_waiting.length === 0 )
+				on_all_load();
+			else
+				on_all_visible_load();
+		}
+
+	},
+
+
+	on_all_visible_load = function ()
+	{
+
+		$document.trigger('sil_load_visible');
+
+		if ( $wrapped_images.length === 0 )
+			on_all_load();
+
+		else if ( !lazyload )
+			load_all_images();
+
+	},
+
+
+	on_all_load = function ()
+	{
+
+		$document.trigger('sil_load_all');
 
 	},
 
@@ -452,8 +467,11 @@ jQuery(function($){
 	on_user_refresh = window.sil_refresh = function()
 	{
 
-		if ( initialized === true )
-			refresh_data( $wrapped_images, true );
+		if ( initialized === true ){
+
+			refresh_data( $wrapped_images );
+			load_visible_images();
+		}
 
 	},
 
@@ -584,8 +602,7 @@ jQuery(function($){
 			if ( sil_options.refresh_scroll )
 				refresh_data( $wrapped_images );
 
-			if ( lazyload )
-				load_visible_images( null, true );
+			load_visible_images();
 
 			scroll_event_last = scroll_event;
 		}
@@ -626,8 +643,7 @@ jQuery(function($){
 			if ( sil_options.refresh_resize )
 				refresh_data( $wrapped_images );
 
-			if ( lazyload )
-				load_visible_images( null, true );
+			load_visible_images();
 
 			resize_event_last = resize_event;
 		}
@@ -649,26 +665,22 @@ jQuery(function($){
 	init = function()
 	{
 
-		$html_body         = $('html, body');
-		$noscripts         = $('body').find('noscript[data-sil]');
-		$wrapped_images    = $(sil_options.selector + '[data-sil]');
-		window_width       = viewport().width;
-		window_height      = viewport().height;
-		host               = d.location.protocol + '//' + d.location.host + '/';
-		scroll_top         = $document.scrollTop();
-		scroll_left        = $document.scrollLeft();
-		doc_height         = $document.height();
-		inertia            = false;
-		rubberbanding      = false;
-		all_loaded         = $wrapped_images.length > 0 ? false : true;
-
+		$html_body      = $('html, body');
+		$noscripts      = $('body').find('noscript[data-sil]');
+		$wrapped_images = $(sil_options.selector + '[data-sil]');
+		window_width    = viewport().width;
+		window_height   = viewport().height;
+		host            = d.location.protocol + '//' + d.location.host + '/';
+		scroll_top      = $document.scrollTop();
+		scroll_left     = $document.scrollLeft();
+		doc_height      = $document.height();
+		$loading_images = $([]);
+		inertia         = false;
+		rubberbanding   = false;
+		all_loaded      = $wrapped_images.length > 0 ? false : true;
 
 		refresh_data( $wrapped_images );
-
-		if ( lazyload )
-			load_visible_images();
-		else
-			load_visible_images( load_all_images );
+		load_visible_images( true );
 
 		render();
 
@@ -680,7 +692,7 @@ jQuery(function($){
 	register_events();
 
 
-});
+})(jQuery);
 
 
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
