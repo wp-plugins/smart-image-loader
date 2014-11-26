@@ -220,7 +220,7 @@
 				offsetLeft: $this.offset().left,
 				width:      $this.width(),
 				height:     $this.height(),
-				visibility: getStyle(this, 'display') != "none" && getStyle(this, 'visibility') != "hidden" && getStyle(this, 'opacity') != "0"
+				visibility: getStyle(this, 'visibility') != "hidden" && getStyle(this, 'opacity') != "0" && $this.is(":visible")
 			});
 
 		});
