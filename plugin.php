@@ -3,7 +3,7 @@
 Plugin Name: Smart Image Loader
 Plugin URI: https://wordpress.org/plugins/smart-image-loader
 Description: Load images visible at page load ('above the fold') first for a fast page loading impression. Optional lazy loading for images 'below the fold'.
-Version: 0.4.0
+Version: 0.4.1
 Text Domain: smart-image-loader
 Author: Bayer und Preuss
 Author URI: www.bayerundpreuss.com
@@ -118,7 +118,8 @@ function _inject_imagewrapper_js()
 			enhanced_accuracy:     <?= get_option('sil-accuracy', 'false') ? 'true' : 'false' ?>,
 			lazy_load_at:          <?= get_option('sil-lazy-load-at', '0') ?>,
 			fade:                  <?= get_option('sil-fade', 'false') ? 'true' : 'false' ?>,
-			placeholder:           <?= '"' . get_option('sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') . '"' ?>
+			placeholder:           <?= '"' . get_option('sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') . '"' ?>,
+			loader:                <?= get_option('sil-loader', 'true') ? 'true' : 'false' ?>
 		};
 	</script>
 <?php
@@ -130,11 +131,23 @@ function sil_noscript()
 	?>
 	<noscript>
 		<style type="text/css">
-			img[data-sil]
-			{ display: none; }
+			img[data-sil] { display: none; }
 		</style>
 	</noscript>
 	<?php
+
+	if ( get_option('sil-loader') ) {
+	?>
+	<style type="text/css">
+		img[data-sil]
+		{
+			background-image: url('/wp-content/plugins/smart-image-loader/loading.gif');
+			background-repeat: no-repeat;
+			background-position: center center;
+		}
+	</style>
+	<?php
+	}
 }add_action('wp_head', 'sil_noscript');
 
 
@@ -167,6 +180,7 @@ function add_sil_options() {
 	add_option( 'sil-lazy-load-at', '0');
 	add_option( 'sil-fade', 'false');
 	add_option( 'sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+	add_option( 'sil-loader', 'true');
 }add_action( 'admin_menu', 'add_sil_options' );
 
 
@@ -184,10 +198,9 @@ function register_sil_settings() {
 	register_setting( 'sil-settings-group', 'sil-lazy-load-at' );
 	register_setting( 'sil-settings-group', 'sil-fade' );
 	register_setting( 'sil-settings-group', 'sil-placeholder' );
+	register_setting( 'sil-settings-group', 'sil-loader' );
 }add_action( 'admin_menu', 'register_sil_settings' );
 
 
 add_filter( 'the_content', 'get_wrapped_html' );
-
-
 
