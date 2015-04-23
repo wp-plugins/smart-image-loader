@@ -220,7 +220,7 @@
 				offsetLeft: $this.offset().left,
 				width:      $this.width(),
 				height:     $this.height(),
-				visibility: getStyle(this, 'visibility') != "hidden" && getStyle(this, 'opacity') != "0" && $this.is(":visible")
+				visibility: getStyle(this, 'display') != "none" && getStyle(this, 'visibility') != "hidden" && getStyle(this, 'opacity') != "0" && $this.is(":visible")
 			});
 
 		});
@@ -423,6 +423,7 @@
 			load_visible_images();
 		}
 
+		e.target.removeAttribute("data-sil");
 
 		$images_to_load = $wrapped_images.filter( is_visible );
 		$images_waiting = $wrapped_images.not($images_to_load);
