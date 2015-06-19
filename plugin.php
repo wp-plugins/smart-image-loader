@@ -3,7 +3,7 @@
 Plugin Name: Smart Image Loader
 Plugin URI: https://wordpress.org/plugins/smart-image-loader
 Description: Load images visible at page load ('above the fold') first for a fast page loading impression. Optional lazy loading for images 'below the fold'.
-Version: 0.4.1
+Version: 0.4.2
 Text Domain: smart-image-loader
 Author: Bayer und Preuss
 Author URI: www.bayerundpreuss.com
@@ -119,7 +119,7 @@ function _inject_imagewrapper_js()
 			lazy_load_at:          <?= get_option('sil-lazy-load-at', '0') ?>,
 			fade:                  <?= get_option('sil-fade', 'false') ? 'true' : 'false' ?>,
 			placeholder:           <?= '"' . get_option('sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') . '"' ?>,
-			loader:                <?= get_option('sil-loader', 'true') ? 'true' : 'false' ?>
+			loader:                <?= get_option('sil-loader', 'false') ? 'true' : 'false' ?>
 		};
 	</script>
 <?php
@@ -135,8 +135,7 @@ function sil_noscript()
 		</style>
 	</noscript>
 	<?php
-
-	if ( get_option('sil-loader') ) {
+	if ( false && get_option('sil-loader') ) {
 	?>
 	<style type="text/css">
 		img[data-sil]
@@ -180,7 +179,7 @@ function add_sil_options() {
 	add_option( 'sil-lazy-load-at', '0');
 	add_option( 'sil-fade', 'false');
 	add_option( 'sil-placeholder', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
-	add_option( 'sil-loader', 'true');
+	add_option( 'sil-loader', 'false');
 }add_action( 'admin_menu', 'add_sil_options' );
 
 
